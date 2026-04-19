@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Portfolio Factory v2.0</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0c0c10;--bg2:#13131a;--bg3:#1a1a24;--bg4:#22222e;--bg5:#2a2a38;
+  --border:#28283a;--border2:#36364a;--border3:#44445a;
+  --text:#eeeef5;--text2:#8888a8;--text3:#4a4a68;
+  --purple:#7c6af7;--purple2:#a89bff;--purple3:#2d2560;--purple4:#1a1540;
+  --teal:#1cb88a;--teal2:#0d7a5c;--teal3:#083d2e;
+  --amber:#e8a020;--amber2:#7a5010;
+  --red:#e05050;--red2:#7a2020;
+  --blue:#4a90e8;--blue2:#1a4080;
+  --pink:#e060a0;--pink2:#6a1848;
+  --green:#50c878;--green2:#1a5a30;
+  --radius:12px;--radius2:7px;--radius3:4px;
+  --font:'Segoe UI',system-ui,sans-serif;
+  --shadow:0 4px 24px rgba(0,0,0,.4);
+}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;overflow:hidden}
+.app{display:grid;grid-template-columns:230px 1fr;height:100vh}
+/* SIDEBAR */
+.sidebar{background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto}
+.logo{padding:18px 16px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border)}
+.logo-icon{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--purple3),var(--purple));display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-text{font-size:15px;font-weight:700;letter-spacing:-.3px}
+.logo-text span{color:var(--purple2)}
+.version-badge{font-size:9px;background:var(--purple3);color:var(--purple2);padding:2px 6px;border-radius:10px;margin-left:4px}
+.nav-sec{font-size:9px;font-weight:700;color:var(--text3);padding:14px 16px 5px;letter-spacing:.12em;text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 16px;font-size:13px;cursor:pointer;color:var(--text2);border-left:2px solid transparent;transition:all .12s;user-select:none;border-radius:0 6px 6px 0;margin:1px 6px 1px 0}
+.nav-item:hover{color:var(--text);background:var(--bg3)}
+.nav-item.active{color:var(--purple2);border-left-color:var(--purple);background:rgba(124,106,247,.1);font-weight:500}
+.nav-item .ico{width:15px;height:15px;flex-shrink:0;opacity:.6}
+.nav-item.active .ico{opacity:1}
+.nav-badge{margin-left:auto;background:var(--purple3);color:var(--purple2);font-size:10px;padding:1px 6px;border-radius:10px}
+.sidebar-bottom{margin-top:auto;padding:14px 16px;border-top:1px solid var(--border)}
+.ai-indicators{display:flex;gap:6px;margin-bottom:8px}
+.ai-dot{width:8px;height:8px;border-radius:50%;background:var(--border2)}
+.ai-dot.on{background:var(--teal)}
+.ai-dot.warn{background:var(--amber)}
+.sidebar-ver{font-size:10px;color:var(--text3);line-height:1.6}
+/* MAIN */
+.main{display:flex;flex-direction:column;overflow:hidden;background:var(--bg)}
+.topbar{padding:13px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--bg2);flex-shrink:0}
+.topbar h2{font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px}
+.topbar-actions{display:flex;gap:7px;align-items:center}
+.content{flex:1;overflow-y:auto;padding:22px}
+/* PANELS */
+.panel{display:none}.panel.active{display:block}
+/* BUTTONS */
+.btn{padding:7px 14px;border-radius:var(--radius2);border:1px solid var(--border2);background:transparent;font-size:13px;cursor:pointer;color:var(--text);font-family:var(--font);transition:all .12s;white-space:nowrap}
+.btn:hover{background:var(--bg4);border-color:var(--border3)}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:var(--purple);color:#fff;border-color:var(--purple)}
+.btn-primary:hover{background:var(--purple2);border-color:var(--purple2)}
+.btn-teal{background:var(--teal2);color:#fff;border-color:var(--teal2)}
+.btn-teal:hover{background:var(--teal);border-color:var(--teal)}
+.btn-red{background:var(--red2);color:#fff;border-color:var(--red2)}
+.btn-amber{background:var(--amber2);color:var(--amber);border-color:var(--amber2)}
+.btn-sm{padding:5px 10px;font-size:12px}
+.btn-xs{padding:3px 8px;font-size:11px}
+.btn-icon{width:30px;height:30px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:var(--radius3)}
+/* GRID */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+/* CARDS */
+.card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px}
+.card2{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px}
+/* STAT */
+.stat{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px}
+.stat-lbl{font-size:11px;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
+.stat-num{font-size:26px;font-weight:700}
+.stat-sub{font-size:11px;color:var(--teal);margin-top:3px}
+/* FORM */
+.fl{font-size:12px;color:var(--text2);margin-bottom:5px;font-weight:500}
+input,select,textarea{width:100%;padding:8px 11px;border:1px solid var(--border2);border-radius:var(--radius2);font-size:13px;background:var(--bg4);color:var(--text);font-family:var(--font);margin-bottom:12px;outline:none;transition:border .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--purple);box-shadow:0 0 0 2px rgba(124,106,247,.12)}
+textarea{resize:vertical;min-height:72px}
+select option{background:var(--bg3)}
+input[type=color]{height:36px;padding:3px;cursor:pointer}
+input[type=range]{padding:0;height:20px;accent-color:var(--purple)}
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600}
+.b-purple{background:rgba(124,106,247,.2);color:var(--purple2)}
+.b-teal{background:rgba(28,184,138,.15);color:var(--teal)}
+.b-amber{background:rgba(232,160,32,.15);color:var(--amber)}
+.b-red{background:rgba(224,80,80,.15);color:var(--red)}
+.b-blue{background:rgba(74,144,232,.15);color:var(--blue)}
+.b-pink{background:rgba(224,96,160,.15);color:var(--pink)}
+.b-green{background:rgba(80,200,120,.15);color:var(--green)}
+/* SECTION TITLES */
+.st{font-size:13px;font-weight:600;margin-bottom:10px;margin-top:18px;color:var(--text);display:flex;align-items:center;gap:7px}
+.st:first-child{margin-top:0}
+.st-line{flex:1;height:1px;background:var(--border)}
+/* PROGRESS */
+.prog-bar{height:5px;background:var(--bg5);border-radius:3px;margin-top:4px;overflow:hidden}
+.prog-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--purple),var(--purple2));transition:width .6s ease}
+/* CODE BOX */
+.code-box{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius2);padding:14px;font-size:12px;font-family:'Courier New',monospace;color:#a8d8a8;line-height:1.7;white-space:pre-wrap;max-height:220px;overflow-y:auto}
+/* AI OUTPUT */
+.ai-box{background:var(--bg);border:1px solid var(--border2);border-radius:var(--radius);padding:16px;font-size:13px;line-height:1.85;color:var(--text);min-height:100px;max-height:380px;overflow-y:auto;white-space:pre-wrap;transition:border-color .3s}
+.ai-box.loading{border-color:var(--purple3);animation:border-pulse 1.5s ease infinite}
+@keyframes border-pulse{0%,100%{border-color:var(--purple3)}50%{border-color:var(--purple)}}
+.ai-thinking{color:var(--purple2);font-style:italic;display:flex;align-items:center;gap:8px}
+.dots span{display:inline-block;animation:dot 1.2s ease infinite}
+.dots span:nth-child(2){animation-delay:.2s}
+.dots span:nth-child(3){animation-delay:.4s}
+@keyframes dot{0%,80%,100%{opacity:.2}40%{opacity:1}}
+/* AI TABS */
+.ai-tabs{display:flex;gap:5px;margin-bottom:14px;flex-wrap:wrap}
+.ai-tab{padding:6px 13px;border-radius:var(--radius2);border:1px solid var(--border2);font-size:12px;cursor:pointer;color:var(--text2);background:transparent;font-family:var(--font);transition:all .12s;display:flex;align-items:center;gap:5px}
+.ai-tab:hover{background:var(--bg4)}
+.ai-tab.active{background:var(--purple4);color:var(--purple2);border-color:var(--purple3)}
+.ai-tab .ai-status-dot{width:6px;height:6px;border-radius:50%;background:var(--border2)}
+.ai-tab .ai-status-dot.on{background:var(--teal)}
+.ai-tab .ai-status-dot.warn{background:var(--amber)}
+/* STEPS */
+.steps{display:flex;gap:5px;margin-bottom:18px}
+.step{flex:1;height:3px;border-radius:2px;background:var(--bg5)}
+.step.done{background:var(--purple)}
+.step.act{background:var(--purple3)}
+/* DIVIDER */
+.div{height:1px;background:var(--border);margin:16px 0}
+/* CLIENT ROW */
+.client-row{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--border)}
+.client-row:last-child{border:none}
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--purple3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--purple2);flex-shrink:0}
+/* TEMPLATE CARD */
+.tpl-card{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:all .2s}
+.tpl-card:hover{border-color:var(--purple);transform:translateY(-2px)}
+.tpl-card.sel{border-color:var(--purple);box-shadow:0 0 0 2px rgba(124,106,247,.25)}
+.tpl-prev{height:85px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;position:relative;overflow:hidden}
+.tpl-info{padding:10px 12px;background:var(--bg3);border-top:1px solid var(--border)}
+.tpl-name{font-size:13px;font-weight:500}
+.tpl-desc{font-size:11px;color:var(--text2);margin-top:2px}
+/* URL BOX */
+.url-row{display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius2);padding:10px 14px;margin-top:8px}
+.url-text{font-size:12px;color:var(--purple2);flex:1;font-family:monospace;word-break:break-all}
+/* NOTIFICATION */
+.notif{position:fixed;bottom:20px;right:20px;background:var(--bg3);border:1px solid var(--teal2);border-radius:var(--radius);padding:12px 18px;font-size:13px;color:var(--teal);display:none;z-index:9999;box-shadow:var(--shadow);max-width:300px}
+.notif.err{border-color:var(--red2);color:var(--red)}
+.notif.warn{border-color:var(--amber2);color:var(--amber)}
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;display:none;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);padding:24px;width:min(520px,90vw);max-height:85vh;overflow-y:auto;box-shadow:var(--shadow)}
+.modal-title{font-size:15px;font-weight:600;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
+/* PDF PREVIEW */
+.pdf-preview{background:#fff;color:#222;border-radius:8px;padding:24px;font-family:Arial,sans-serif;min-height:200px;font-size:12px;line-height:1.6}
+.pdf-preview h1{font-size:20px;color:#333;margin-bottom:4px}
+.pdf-preview .sub{color:#666;font-size:13px;margin-bottom:12px}
+.pdf-preview .section-h{font-size:13px;font-weight:700;color:var(--purple);border-bottom:2px solid #eee;margin:14px 0 8px;padding-bottom:4px}
+.pdf-preview .skill-line{display:flex;align-items:center;gap:8px;margin:4px 0;font-size:11px}
+.pdf-preview .skill-bar-pdf{flex:1;height:4px;background:#eee;border-radius:2px;overflow:hidden}
+.pdf-preview .skill-fill-pdf{height:100%;background:#7c6af7;border-radius:2px}
+/* ANALYTICS */
+.chart-bar-h{display:flex;align-items:center;gap:10px;margin:6px 0}
+.chart-bar-h .label{font-size:12px;color:var(--text2);width:110px;text-align:right;flex-shrink:0}
+.chart-bar-h .bar-wrap{flex:1;height:18px;background:var(--bg4);border-radius:3px;overflow:hidden}
+.chart-bar-h .bar-fill{height:100%;background:linear-gradient(90deg,var(--purple),var(--purple2));border-radius:3px;display:flex;align-items:center;padding-left:6px;font-size:10px;color:rgba(255,255,255,.8)}
+/* SCHEDULER */
+.task-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}
+.task-item:last-child{border:none}
+.task-check{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--border2);cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.task-check.done{background:var(--teal);border-color:var(--teal)}
+.task-text{flex:1;font-size:13px}
+.task-text.done{color:var(--text3);text-decoration:line-through}
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+/* PREVIEW IFRAME */
+.preview-wrap{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;height:320px}
+.preview-wrap iframe{width:100%;height:100%;border:none;transform-origin:top left}
+/* TABS */
+.tab-bar{display:flex;border-bottom:1px solid var(--border);margin-bottom:16px}
+.tab-btn{padding:8px 16px;font-size:13px;cursor:pointer;color:var(--text2);border-bottom:2px solid transparent;background:transparent;border-left:none;border-right:none;border-top:none;font-family:var(--font);transition:all .15s}
+.tab-btn.active{color:var(--purple2);border-bottom-color:var(--purple)}
+.tab-content{display:none}.tab-content.active{display:block}
+</style>
+</head>
+<body>
+
+<div class="app">
+<!-- ═══════════════════════════════ SIDEBAR ═══════════════════════════════ -->
+<div class="sidebar">
+  <div class="logo">
+    <div class="logo-icon">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="1" y="1" width="7" height="7" rx="2" fill="#a89bff"/><rect x="10" y="1" width="7" height="7" rx="2" fill="#7c6af7" opacity=".7"/><rect x="1" y="10" width="7" height="7" rx="2" fill="#7c6af7" opacity=".5"/><rect x="10" y="10" width="7" height="7" rx="2" fill="#a89bff" opacity=".4"/></svg>
+    </div>
+    <div class="logo-text">Portfolio<span>Factory</span><span class="version-badge">v2.0</span></div>
+  </div>
+
+  <div class="nav-sec">Créer</div>
+  <div class="nav-item active" onclick="nav(this,'create')"><svg class="ico" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" fill="currentColor"/><rect x="9" y="1" width="6" height="6" rx="1.5" fill="currentColor"/><rect x="1" y="9" width="6" height="6" rx="1.5" fill="currentColor"/><rect x="9" y="9" width="6" height="6" rx="1.5" fill="currentColor"/></svg>Nouveau portfolio</div>
+  <div class="nav-item" onclick="nav(this,'ai')"><svg class="ico" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/><path d="M5.5 8c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="8" r="1" fill="currentColor"/></svg>Générer avec IA<span class="nav-badge" id="nb-ai">3</span></div>
+  <div class="nav-item" onclick="nav(this,'editor')"><svg class="ico" viewBox="0 0 16 16" fill="none"><path d="M11 2L14 5L5 14H2V11L11 2Z" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>Modifier portfolio</div>
+  <div class="nav-item" onclick="nav(this,'preview')"><svg class="ico" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M1 8c1.5-4 4-6 7-6s5.5 2 7 6c-1.5 4-4 6-7 6s-5.5-2-7-6z" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>Aperçu live</div>
+
+  <div class="nav-sec">Business</div>
+  <div class="nav-item" onclick="nav(this,'clients')"><svg class="ico" viewBox="0 0 16 16" fill="none"><circle cx="6" cy="5" r="3" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M1 14c0-3 2.2-5 5-5s5 2 5 5" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M11 8l1.5 1.5L16 6" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>Mes clients<span class="nav-badge" id="nb-clients">4</span></div>
+  <div class="nav-item" onclick="nav(this,'templates')"><svg class="ico" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="14" height="9" rx="1.5" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M4 14h8M8 10v4" stroke="currentColor" stroke-width="1.5"/></svg>Templates<span class="nav-badge">6</span></div>
+  <div class="nav-item" onclick="nav(this,'tasks')"><svg class="ico" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>Tâches & planning</div>
+  <div class="nav-item" onclick="nav(this,'analytics')"><svg class="ico" viewBox="0 0 16 16" fill="none"><rect x="1" y="8" width="3" height="7" fill="currentColor"/><rect x="6" y="5" width="3" height="10" fill="currentColor"/><rect x="11" y="2" width="3" height="13" fill="currentColor"/></svg>Analytics</div>
+
+  <div class="nav-sec">Exporter</div>
+  <div class="nav-item" onclick="nav(this,'pdf')"><svg class="ico" viewBox="0 0 16 16" fill="none"><rect x="2" y="1" width="9" height="14" rx="1.5" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M5 5h5M5 8h5M5 11h3" stroke="currentColor" stroke-width="1.5"/><path d="M11 1v4h3" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>Export PDF / CV</div>
+  <div class="nav-item" onclick="nav(this,'deploy')"><svg class="ico" viewBox="0 0 16 16" fill="none"><path d="M8 2v8M5 7l3 3 3-3" stroke="currentColor" stroke-width="1.5"/><path d="M2 12h12" stroke="currentColor" stroke-width="1.5"/></svg>Publier GitHub</div>
+  <div class="nav-item" onclick="nav(this,'export')"><svg class="ico" viewBox="0 0 16 16" fill="none"><path d="M10 1H4a1 1 0 00-1 1v12a1 1 0 001 1h8a1 1 0 001-1V5l-3-4z" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M10 1v4h3" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>Exporter fichiers</div>
+
+  <div class="nav-sec">Config</div>
+  <div class="nav-item" onclick="nav(this,'settings')"><svg class="ico" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.2 3.2l1.4 1.4M11.4 11.4l1.4 1.4M11.4 4.6l-1.4 1.4M4.6 11.4l-1.4 1.4" stroke="currentColor" stroke-width="1.5"/></svg>Paramètres IA</div>
+
+  <div class="sidebar-bottom">
+    <div class="ai-indicators">
+      <div class="ai-dot" id="dot-claude" title="Claude"></div>
+      <div class="ai-dot warn" id="dot-manus" title="Manus"></div>
+      <div class="ai-dot" id="dot-custom" title="Custom IA"></div>
+    </div>
+    <div class="sidebar-ver">Portfolio Factory v2.0<br>Multi-IA · PDF · Local · No-code</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ MAIN ═══════════════════════════════ -->
+<div class="main">
+
+<!-- ══ PANEL: CREATE ══ -->
+<div class="panel active" id="panel-create">
+  <div class="topbar"><h2>Nouveau portfolio</h2><div class="topbar-actions"><button class="btn btn-sm" onclick="nav(document.querySelectorAll('.nav-item')[1],'ai')">IA → générer</button><button class="btn btn-primary btn-sm" onclick="buildPortfolio()">Créer le portfolio</button></div></div>
+  <div class="content">
+    <div class="steps"><div class="step done"></div><div class="step act"></div><div class="step"></div><div class="step"></div></div>
+    <div class="g2">
+      <div>
+        <div class="st">Identité <span class="st-line"></span></div>
+        <div class="fl">Nom complet</div><input id="c-name" placeholder="Sara Benali"/>
+        <div class="fl">Titre / Métier</div><input id="c-title" placeholder="Ingénieure Data Science & IA"/>
+        <div class="fl">Bio professionnelle</div><textarea id="c-bio" placeholder="Décris ton parcours, tes passions, tes objectifs..."></textarea>
+        <div class="fl">Email</div><input id="c-email" placeholder="sara@email.com"/>
+        <div class="fl">Téléphone</div><input id="c-phone" placeholder="+212 6 XX XX XX XX"/>
+        <div class="fl">GitHub</div><input id="c-github" placeholder="https://github.com/..."/>
+        <div class="fl">LinkedIn</div><input id="c-linkedin" placeholder="https://linkedin.com/in/..."/>
+        <div class="fl">Ville</div><input id="c-city" placeholder="Rabat, Maroc"/>
+      </div>
+      <div>
+        <div class="st">Contenu & Design <span class="st-line"></span></div>
+        <div class="fl">Secteur</div>
+        <select id="c-sector"><option>Développeur / Ingénieur logiciel</option><option>Data Science / IA / ML</option><option>Designer UX/UI</option><option>Marketing / Business</option><option>Étudiant / Jeune diplômé</option><option>Freelance / Consultant</option><option>Ingénieur civil / BTP</option><option>Médecin / Santé</option><option>Juridique / Droit</option><option>Finance / Comptabilité</option></select>
+        <div class="fl">Couleur principale</div>
+        <select id="c-color"><option value="purple">Violet professionnel</option><option value="blue">Bleu corporate</option><option value="teal">Teal moderne</option><option value="dark">Sombre élégant</option><option value="white">Blanc minimaliste</option></select>
+        <div class="fl">Template</div>
+        <select id="c-template"><option>template-developer</option><option>template-engineer</option><option>template-designer</option><option>template-business</option><option>template-student</option></select>
+        <div class="fl">Mode</div>
+        <select id="c-mode"><option>Personnel</option><option>Client</option></select>
+        <div class="fl">Projets (virgule)</div><input id="c-projects" placeholder="App IA, Dashboard BI, API REST"/>
+        <div class="fl">Compétences (virgule)</div><input id="c-skills" placeholder="Python, React, SQL, TensorFlow"/>
+        <div class="fl">Expériences (virgule)</div><input id="c-exp" placeholder="Stage Atos 2023, Dev junior OCP 2024"/>
+        <div class="fl">Certifications</div><input id="c-certs" placeholder="AWS Cloud, Google ML, Cisco CCNA"/>
+      </div>
+    </div>
+    <div id="create-output" style="display:none;margin-top:16px">
+      <div class="div"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+        <button class="btn btn-sm btn-teal" onclick="downloadHTML()">Télécharger index.html</button>
+        <button class="btn btn-sm" onclick="downloadJSON()">Télécharger data.json</button>
+        <button class="btn btn-sm" onclick="copyCode()">Copier le code</button>
+        <button class="btn btn-sm btn-primary" onclick="nav(document.querySelectorAll('.nav-item')[3],'preview')">Aperçu →</button>
+        <button class="btn btn-sm" onclick="nav(document.querySelectorAll('.nav-item')[10],'pdf')">Export PDF →</button>
+      </div>
+      <div class="code-box" id="create-code"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PANEL: AI ══ -->
+<div class="panel" id="panel-ai">
+  <div class="topbar"><h2>Générer avec IA <span class="badge b-purple" id="ai-status-badge">Claude</span></h2><div class="topbar-actions"><button class="btn btn-sm" onclick="testAIConnection()">Tester connexion</button></div></div>
+  <div class="content">
+    <div class="ai-tabs">
+      <button class="ai-tab active" onclick="selectAI(this,'claude')"><span class="ai-status-dot" id="dot-tab-claude"></span>Claude (Anthropic)</button>
+      <button class="ai-tab" onclick="selectAI(this,'manus')"><span class="ai-status-dot warn" id="dot-tab-manus"></span>Manus AI</button>
+      <button class="ai-tab" onclick="selectAI(this,'openai')"><span class="ai-status-dot" id="dot-tab-openai"></span>OpenAI / GPT</button>
+      <button class="ai-tab" onclick="selectAI(this,'custom')"><span class="ai-status-dot" id="dot-tab-custom"></span>IA personnalisée</button>
+    </div>
+    <div class="g2" style="margin-bottom:14px">
+      <div>
+        <div class="fl">Type de génération</div>
+        <select id="ai-type">
+          <option>Portfolio complet HTML + data.json</option>
+          <option>Bio professionnelle optimisée SEO</option>
+          <option>Description de projet percutante</option>
+          <option>Liste de compétences par secteur</option>
+          <option>Texte "À propos" engageant</option>
+          <option>Lettre de motivation</option>
+          <option>Résumé CV une page</option>
+          <option>Optimisation SEO du portfolio</option>
+          <option>Analyse concurrentielle secteur</option>
+          <option>Stratégie personal branding</option>
+        </select>
+        <div class="fl">Secteur cible</div>
+        <select id="ai-sector"><option>Développeur fullstack</option><option>Data Scientist</option><option>Designer UX</option><option>Ingénieur civil</option><option>Étudiant informatique</option><option>Freelance marketing</option><option>Consultant finance</option></select>
+        <div class="fl">Langue de sortie</div>
+        <select id="ai-lang"><option>Français</option><option>Anglais</option><option>Arabe</option><option>Espagnol</option></select>
+      </div>
+      <div>
+        <div class="fl">Informations & contexte</div>
+        <textarea id="ai-prompt" placeholder="Décris ce que tu veux : nom, expérience, projets, compétences, style, public cible..." style="min-height:120px"></textarea>
+        <div class="fl">Tonalité</div>
+        <select id="ai-tone"><option>Professionnel & formel</option><option>Moderne & dynamique</option><option>Créatif & original</option><option>Académique & précis</option></select>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+      <button class="btn btn-primary" onclick="callAI()">Générer →</button>
+      <button class="btn btn-sm" onclick="callAIAll()">Comparer les 3 IA →</button>
+      <button class="btn btn-sm" onclick="clearAIOutput()">Effacer</button>
+    </div>
+    <div class="fl" id="ai-model-label">Modèle actif : claude-sonnet-4-20250514</div>
+    <div class="ai-box" id="ai-output">Le résultat apparaîtra ici...</div>
+    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+      <button class="btn btn-sm" onclick="copyAIOutput()">Copier</button>
+      <button class="btn btn-sm btn-teal" onclick="injectToEditor()">→ Injecter dans l'éditeur</button>
+      <button class="btn btn-sm" onclick="injectToCreate()">→ Injecter dans Créer</button>
+      <button class="btn btn-sm btn-amber" onclick="saveAIHistory()">Sauvegarder</button>
+    </div>
+    <div id="ai-history-wrap" style="margin-top:16px;display:none">
+      <div class="st">Historique IA <span class="st-line"></span></div>
+      <div id="ai-history-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PANEL: EDITOR ══ -->
+<div class="panel" id="panel-editor">
+  <div class="topbar"><h2>Modifier portfolio</h2><div class="topbar-actions"><button class="btn btn-sm" onclick="nav(document.querySelectorAll('.nav-item')[1],'ai')">Améliorer avec IA →</button><button class="btn btn-primary btn-sm" onclick="saveEditor()">Sauvegarder</button></div></div>
+  <div class="content">
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab(this,'tab-identity')">Identité</button>
+      <button class="tab-btn" onclick="switchTab(this,'tab-skills')">Compétences</button>
+      <button class="tab-btn" onclick="switchTab(this,'tab-projects')">Projets</button>
+      <button class="tab-btn" onclick="switchTab(this,'tab-exp')">Expériences</button>
+      <button class="tab-btn" onclick="switchTab(this,'tab-design')">Design</button>
+    </div>
+    <div class="tab-content active" id="tab-identity">
+      <div class="g2">
+        <div><div class="fl">Nom</div><input id="e-name" value="Sara Benali"/><div class="fl">Titre</div><input id="e-title" value="Ingénieure Data Science & IA"/><div class="fl">Email</div><input id="e-email" value="sara@email.com"/><div class="fl">Ville</div><input id="e-city" value="Rabat, Maroc"/></div>
+        <div><div class="fl">Bio</div><textarea id="e-bio" style="min-height:130px">Ingénieure passionnée par la donnée et l'intelligence artificielle, avec 2 ans d'expérience en machine learning. Je transforme des données complexes en insights actionnables pour les équipes métier.</textarea><div class="fl">GitHub</div><input id="e-gh" value="https://github.com/sara-benali"/></div>
+      </div>
+    </div>
+    <div class="tab-content" id="tab-skills">
+      <div id="skills-editor"></div>
+      <div class="div"></div>
+      <div style="display:flex;gap:8px;align-items:flex-end">
+        <div style="flex:1"><div class="fl">Nouvelle compétence</div><input id="new-skill-name" placeholder="ex: TensorFlow"/></div>
+        <div style="width:80px"><div class="fl">Niveau %</div><input id="new-skill-lvl" type="number" min="1" max="100" value="75" style="margin-bottom:0"/></div>
+        <button class="btn btn-primary btn-sm" style="margin-bottom:12px" onclick="addSkill()">+ Ajouter</button>
+      </div>
+    </div>
+    <div class="tab-content" id="tab-projects">
+      <div id="projects-editor"></div>
+      <div class="div"></div>
+      <div class="card"><div class="st" style="margin-top:0">Nouveau projet</div>
+        <div class="g2"><div><div class="fl">Titre</div><input id="np-title" placeholder="Dashboard BI"/><div class="fl">Technologies</div><input id="np-tech" placeholder="Python, Dash, SQL"/></div><div><div class="fl">Description</div><textarea id="np-desc" placeholder="Ce projet consiste à..."></textarea><button class="btn btn-primary btn-sm" onclick="addProject()">+ Ajouter</button></div></div>
+      </div>
+    </div>
+    <div class="tab-content" id="tab-exp">
+      <div id="exp-editor"></div>
+      <div class="div"></div>
+      <div class="card"><div class="st" style="margin-top:0">Nouvelle expérience</div>
+        <div class="g2"><div><div class="fl">Poste</div><input id="ne-role" placeholder="Développeur junior"/><div class="fl">Entreprise</div><input id="ne-company" placeholder="Atos Maroc"/></div><div><div class="fl">Période</div><input id="ne-period" placeholder="2023 – 2024"/><div class="fl">Description</div><textarea id="ne-desc" placeholder="Missions et réalisations..."></textarea><button class="btn btn-primary btn-sm" onclick="addExp()">+ Ajouter</button></div></div>
+      </div>
+    </div>
+    <div class="tab-content" id="tab-design">
+      <div class="g2">
+        <div><div class="fl">Couleur principale</div><input type="color" id="d-color" value="#7c6af7"/><div class="fl">Police</div><select><option>Segoe UI (défaut)</option><option>Inter</option><option>Roboto</option><option>Poppins</option></select><div class="fl">Animation</div><select><option>Légère (recommandé)</option><option>Aucune</option><option>Dynamique</option></select></div>
+        <div><div class="fl">Mode</div><select id="d-mode"><option>Sombre (dark)</option><option>Clair (light)</option></select><div class="fl">Layout sections</div><select><option>Standard</option><option>Minimaliste</option><option>Créatif</option></select><div class="fl">Sections visibles</div>
+          <div style="display:grid;gap:6px;font-size:13px">
+            <label style="display:flex;align-items:center;gap:7px;cursor:pointer"><input type="checkbox" checked style="width:auto;margin:0"> À propos</label>
+            <label style="display:flex;align-items:center;gap:7px;cursor:pointer"><input type="checkbox" checked style="width:auto;margin:0"> Compétences</label>
+            <label style="display:flex;align-items:center;gap:7px;cursor:pointer"><input type="checkbox" checked style="width:auto;margin:0"> Projets</label>
+            <label style="display:flex;align-items:center;gap:7px;cursor:pointer"><input type="checkbox" checked style="width:auto;margin:0"> Expériences</label>
+            <label style="display:flex;align-items:center;gap:7px;cursor:pointer"><input type="checkbox" style="width:auto;margin:0"> Certifications</label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="editor-saved" style="display:none;margin-top:12px" class="badge b-teal">✓ Sauvegardé dans le navigateur</div>
+  </div>
+</div>
+
+<!-- ══ PANEL: PREVIEW ══ -->
+<div class="panel" id="panel-preview">
+  <div class="topbar"><h2>Aperçu live</h2><div class="topbar-actions"><button class="btn btn-sm" onclick="buildPortfolioSilent();refreshPreview()">Actualiser</button><button class="btn btn-sm btn-primary" onclick="downloadHTML()">Télécharger</button></div></div>
+  <div class="content">
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <button class="btn btn-sm active" onclick="setPreviewSize('100%','100%')">Desktop</button>
+      <button class="btn btn-sm" onclick="setPreviewSize('768px','600px')">Tablet</button>
+      <button class="btn btn-sm" onclick="setPreviewSize('375px','600px')">Mobile</button>
+    </div>
+    <div class="preview-wrap" id="preview-wrap">
+      <iframe id="preview-frame" sandbox="allow-scripts"></iframe>
+    </div>
+    <p style="font-size:12px;color:var(--text3);margin-top:8px">Crée d'abord un portfolio dans "Nouveau portfolio", puis clique Actualiser.</p>
+  </div>
+</div>
+
+<!-- ══ PANEL: CLIENTS ══ -->
+<div class="panel" id="panel-clients">
+  <div class="topbar"><h2>Mes clients</h2><div class="topbar-actions"><button class="btn btn-primary btn-sm" onclick="openAddClientModal()">+ Nouveau client</button></div></div>
+  <div class="content">
+    <div class="g4" style="margin-bottom:18px">
+      <div class="stat"><div class="stat-lbl">Total</div><div class="stat-num" id="ct-total">4</div></div>
+      <div class="stat"><div class="stat-lbl">Publiés</div><div class="stat-num" style="color:var(--teal)" id="ct-pub">2</div></div>
+      <div class="stat"><div class="stat-lbl">En cours</div><div class="stat-num" style="color:var(--amber)" id="ct-prog">2</div></div>
+      <div class="stat"><div class="stat-lbl">Revenus est.</div><div class="stat-num" style="color:var(--purple2)" id="ct-rev">3 500</div><div class="stat-sub">MAD</div></div>
+    </div>
+    <div class="card2" id="clients-list">
+      <div class="client-row"><div style="display:flex;align-items:center;gap:10px"><div class="avatar">YB</div><div><div style="font-size:13px;font-weight:500">Yassine Berrada</div><div style="font-size:11px;color:var(--text2)">Ingénieur civil · template-engineer</div></div></div><div style="display:flex;align-items:center;gap:7px"><span class="badge b-teal">Publié</span><button class="btn btn-xs" onclick="nav(document.querySelectorAll('.nav-item')[10],'pdf')">PDF</button><button class="btn btn-xs">Modifier</button></div></div>
+      <div class="client-row"><div style="display:flex;align-items:center;gap:10px"><div class="avatar" style="background:var(--teal3);color:var(--teal)">LM</div><div><div style="font-size:13px;font-weight:500">Leila Mansouri</div><div style="font-size:11px;color:var(--text2)">Designer UX · template-designer</div></div></div><div style="display:flex;align-items:center;gap:7px"><span class="badge b-teal">Publié</span><button class="btn btn-xs" onclick="nav(document.querySelectorAll('.nav-item')[10],'pdf')">PDF</button><button class="btn btn-xs">Modifier</button></div></div>
+      <div class="client-row"><div style="display:flex;align-items:center;gap:10px"><div class="avatar" style="background:var(--amber2);color:var(--amber)">AK</div><div><div style="font-size:13px;font-weight:500">Amine Khalil</div><div style="font-size:11px;color:var(--text2)">Développeur fullstack · template-developer</div></div></div><div style="display:flex;align-items:center;gap:7px"><span class="badge b-amber">En cours</span><button class="btn btn-xs" onclick="nav(document.querySelectorAll('.nav-item')[10],'pdf')">PDF</button><button class="btn btn-xs" onclick="nav(document.querySelectorAll('.nav-item')[2],'editor')">Modifier</button></div></div>
+      <div class="client-row"><div style="display:flex;align-items:center;gap:10px"><div class="avatar" style="background:var(--red2);color:var(--red)">NB</div><div><div style="font-size:13px;font-weight:500">Nadia Bensalem</div><div style="font-size:11px;color:var(--text2)">Freelance marketing · template-business</div></div></div><div style="display:flex;align-items:center;gap:7px"><span class="badge b-amber">En cours</span><button class="btn btn-xs" onclick="nav(document.querySelectorAll('.nav-item')[10],'pdf')">PDF</button><button class="btn btn-xs" onclick="nav(document.querySelectorAll('.nav-item')[2],'editor')">Modifier</button></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PANEL: TEMPLATES ══ -->
+<div class="panel" id="panel-templates">
+  <div class="topbar"><h2>Templates</h2><div class="topbar-actions"><button class="btn btn-primary btn-sm" onclick="nav(document.querySelectorAll('.nav-item')[1],'ai')">Générer avec IA →</button></div></div>
+  <div class="content">
+    <div class="g2" style="margin-bottom:14px">
+      <div class="tpl-card sel" onclick="selTpl(this,'developer')"><div class="tpl-prev" style="background:rgba(124,106,247,.15)"><span style="color:var(--purple2)">Developer</span></div><div class="tpl-info"><div class="tpl-name">template-developer</div><div class="tpl-desc">React · APIs · Dark mode · Animations</div></div></div>
+      <div class="tpl-card" onclick="selTpl(this,'engineer')"><div class="tpl-prev" style="background:rgba(28,184,138,.12)"><span style="color:var(--teal)">Ingénieur</span></div><div class="tpl-info"><div class="tpl-name">template-engineer</div><div class="tpl-desc">Civil · Mécanique · BTP · Industriel</div></div></div>
+      <div class="tpl-card" onclick="selTpl(this,'designer')"><div class="tpl-prev" style="background:rgba(224,96,160,.12)"><span style="color:var(--pink)">Designer</span></div><div class="tpl-info"><div class="tpl-name">template-designer</div><div class="tpl-desc">UX/UI · Portfolio visuel · Galerie</div></div></div>
+      <div class="tpl-card" onclick="selTpl(this,'business')"><div class="tpl-prev" style="background:rgba(232,160,32,.12)"><span style="color:var(--amber)">Business</span></div><div class="tpl-info"><div class="tpl-name">template-business</div><div class="tpl-desc">Freelance · Consultant · PME</div></div></div>
+      <div class="tpl-card" onclick="selTpl(this,'student')"><div class="tpl-prev" style="background:rgba(74,144,232,.12)"><span style="color:var(--blue)">Étudiant</span></div><div class="tpl-info"><div class="tpl-name">template-student</div><div class="tpl-desc">Stages · PFE · Premier emploi</div></div></div>
+      <div class="tpl-card" onclick="selTpl(this,'medical')"><div class="tpl-prev" style="background:rgba(80,200,120,.12)"><span style="color:var(--green)">Médecin</span></div><div class="tpl-info"><div class="tpl-name">template-medical</div><div class="tpl-desc">Santé · Publications · Clinique</div></div></div>
+    </div>
+    <div class="st">Chemin Windows <span class="st-line"></span></div>
+    <div class="code-box">E:\projets IA\Portfolio_Factory\Templates\
+ ├── template-developer\  ├── index.html  └── data.json
+ ├── template-engineer\
+ ├── template-designer\
+ ├── template-business\
+ ├── template-student\
+ └── template-medical\</div>
+  </div>
+</div>
+
+<!-- ══ PANEL: TASKS ══ -->
+<div class="panel" id="panel-tasks">
+  <div class="topbar"><h2>Tâches & planning</h2><div class="topbar-actions"><button class="btn btn-primary btn-sm" onclick="addTask()">+ Ajouter</button></div></div>
+  <div class="content">
+    <div class="g2">
+      <div>
+        <div class="st">Tâches actives <span class="st-line"></span></div>
+        <div class="card2" id="task-list">
+          <div class="task-item"><div class="task-check" onclick="toggleTask(this)"></div><div class="task-text">Créer portfolio Sara Benali</div><span class="badge b-red" style="font-size:10px">Urgent</span></div>
+          <div class="task-item"><div class="task-check done" onclick="toggleTask(this)"><svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3" stroke="white" stroke-width="1.5" fill="none"/></svg></div><div class="task-text done">Déployer portfolio Yassine</div><span class="badge b-teal" style="font-size:10px">Fait</span></div>
+          <div class="task-item"><div class="task-check" onclick="toggleTask(this)"></div><div class="task-text">Envoyer PDF à Leila Mansouri</div><span class="badge b-amber" style="font-size:10px">En cours</span></div>
+          <div class="task-item"><div class="task-check" onclick="toggleTask(this)"></div><div class="task-text">Créer template médecin</div><span class="badge b-purple" style="font-size:10px">Planifié</span></div>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:10px">
+          <input id="new-task-txt" placeholder="Nouvelle tâche..." style="margin:0;flex:1"/>
+          <select id="new-task-prio" style="margin:0;width:100px"><option>Urgent</option><option>En cours</option><option>Planifié</option></select>
+          <button class="btn btn-sm btn-primary" onclick="addTask()">+</button>
+        </div>
+      </div>
+      <div>
+        <div class="st">Suivi clients <span class="st-line"></span></div>
+        <div class="card2">
+          <div style="font-size:12px;color:var(--text2);margin-bottom:10px">Prochaines livraisons</div>
+          <div style="display:grid;gap:8px">
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px"><span>Amine Khalil</span><span class="badge b-amber">25 avr.</span></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px"><span>Nadia Bensalem</span><span class="badge b-red">30 avr.</span></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px"><span>Nouveau client</span><span class="badge b-purple">Mai 2026</span></div>
+          </div>
+          <div class="div"></div>
+          <div class="st" style="margin-top:0">Revenus (estimé)</div>
+          <div style="font-size:28px;font-weight:700;color:var(--purple2)">3 500 <span style="font-size:14px;color:var(--text2)">MAD</span></div>
+          <div style="font-size:12px;color:var(--teal);margin-top:4px">+500 MAD ce mois</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PANEL: ANALYTICS ══ -->
+<div class="panel" id="panel-analytics">
+  <div class="topbar"><h2>Analytics</h2></div>
+  <div class="content">
+    <div class="g4" style="margin-bottom:18px">
+      <div class="stat"><div class="stat-lbl">Portfolios</div><div class="stat-num">12</div><div class="stat-sub">+3 ce mois</div></div>
+      <div class="stat"><div class="stat-lbl">Publiés</div><div class="stat-num" style="color:var(--teal)">9</div></div>
+      <div class="stat"><div class="stat-lbl">Templates</div><div class="stat-num" style="color:var(--purple2)">6</div></div>
+      <div class="stat"><div class="stat-lbl">Génér. IA</div><div class="stat-num" style="color:var(--amber)">47</div></div>
+    </div>
+    <div class="g2">
+      <div class="card">
+        <div class="st" style="margin-top:0">Templates utilisés <span class="st-line"></span></div>
+        <div class="chart-bar-h"><div class="label">Developer</div><div class="bar-wrap"><div class="bar-fill" style="width:80%">8</div></div></div>
+        <div class="chart-bar-h"><div class="label">Engineer</div><div class="bar-wrap"><div class="bar-fill" style="width:50%">5</div></div></div>
+        <div class="chart-bar-h"><div class="label">Business</div><div class="bar-wrap"><div class="bar-fill" style="width:40%">4</div></div></div>
+        <div class="chart-bar-h"><div class="label">Designer</div><div class="bar-wrap"><div class="bar-fill" style="width:30%">3</div></div></div>
+        <div class="chart-bar-h"><div class="label">Student</div><div class="bar-wrap"><div class="bar-fill" style="width:20%">2</div></div></div>
+      </div>
+      <div class="card">
+        <div class="st" style="margin-top:0">IA utilisées <span class="st-line"></span></div>
+        <div class="chart-bar-h"><div class="label">Claude</div><div class="bar-wrap"><div class="bar-fill" style="width:70%;background:linear-gradient(90deg,var(--purple),var(--purple2))">33</div></div></div>
+        <div class="chart-bar-h"><div class="label">Manus</div><div class="bar-wrap"><div class="bar-fill" style="width:20%;background:linear-gradient(90deg,var(--amber2),var(--amber))">9</div></div></div>
+        <div class="chart-bar-h"><div class="label">Custom</div><div class="bar-wrap"><div class="bar-fill" style="width:10%;background:linear-gradient(90deg,var(--teal2),var(--teal))">5</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PANEL: PDF ══ -->
+<div class="panel" id="panel-pdf">
+  <div class="topbar"><h2>Export PDF / CV</h2><div class="topbar-actions"><button class="btn btn-primary btn-sm" onclick="exportPDF()">Générer PDF</button></div></div>
+  <div class="content">
+    <div class="g2">
+      <div>
+        <div class="st">Configuration PDF <span class="st-line"></span></div>
+        <div class="fl">Format</div>
+        <select id="pdf-format"><option value="cv">CV classique (1 page)</option><option value="portfolio">Portfolio complet (2-3 pages)</option><option value="cover">Lettre de motivation</option><option value="brief">Fiche profil (mini)</option></select>
+        <div class="fl">Langue</div>
+        <select id="pdf-lang"><option>Français</option><option>Anglais</option><option>Arabe</option></select>
+        <div class="fl">Couleur d'accentuation PDF</div>
+        <input type="color" id="pdf-color" value="#7c6af7"/>
+        <div class="fl">Nom du fichier</div>
+        <input id="pdf-filename" value="CV-Sara-Benali-2026"/>
+        <div class="fl">Inclure sections</div>
+        <div style="display:grid;gap:6px;font-size:13px;margin-bottom:12px">
+          <label style="display:flex;align-items:center;gap:7px;cursor:pointer"><input type="checkbox" checked style="width:auto;margin:0"> Informations personnelles</label>
+          <label style="display:flex;align-items:center;gap:7px;cursor:pointer"><input type="checkbox" checked style="width:auto;margin:0"> Compétences avec barres</label>
+          <label style="display:flex;align-items:center;gap:7px;cursor:pointer"><input type="checkbox" checked style="width:auto;margin:0"> Projets</label>
+          <label style="display:flex;align-items:center;gap:7px;cursor:pointer"><input type="checkbox" checked style="width:auto;margin:0"> Expériences</label>
+          <label style="display:flex;align-items:center;gap:7px;cursor:pointer"><input type="checkbox" style="width:auto;margin:0"> Certifications</label>
+          <label style="display:flex;align-items:center;gap:7px;cursor:pointer"><input type="checkbox" style="width:auto;margin:0"> QR Code portfolio en ligne</label>
+        </div>
+        <button class="btn btn-primary" onclick="exportPDF()">Générer & Télécharger PDF</button>
+        <button class="btn btn-sm" style="margin-top:8px" onclick="previewPDF()">Aperçu PDF</button>
+      </div>
+      <div>
+        <div class="st">Aperçu <span class="st-line"></span></div>
+        <div class="pdf-preview" id="pdf-preview-content">
+          <h1>Sara Benali</h1>
+          <div class="sub">Ingénieure Data Science & IA · Rabat, Maroc · sara@email.com</div>
+          <div class="section-h">À propos</div>
+          <p>Ingénieure passionnée par la donnée et l'intelligence artificielle, avec 2 ans d'expérience en machine learning. Je transforme des données complexes en insights actionnables.</p>
+          <div class="section-h">Compétences</div>
+          <div class="skill-line"><span style="width:110px">Python</span><div class="skill-bar-pdf"><div class="skill-fill-pdf" style="width:90%"></div></div><span style="margin-left:6px">90%</span></div>
+          <div class="skill-line"><span style="width:110px">Machine Learning</span><div class="skill-bar-pdf"><div class="skill-fill-pdf" style="width:80%"></div></div><span style="margin-left:6px">80%</span></div>
+          <div class="skill-line"><span style="width:110px">SQL / Power BI</span><div class="skill-bar-pdf"><div class="skill-fill-pdf" style="width:75%"></div></div><span style="margin-left:6px">75%</span></div>
+          <div class="section-h">Expérience</div>
+          <p><strong>Développeuse Data</strong> — OCP Group · 2023–présent<br>Analyse de données de production, dashboards Power BI, modèles prédictifs Python.</p>
+          <div class="section-h">Projets</div>
+          <p><strong>Dashboard BI</strong> — Python, Dash, SQL · Visualisation des KPIs de production en temps réel.</p>
+          <p style="margin-top:6px"><strong>Modèle ML</strong> — TensorFlow, scikit-learn · Prédiction de pannes équipements industriels.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PANEL: DEPLOY ══ -->
+<div class="panel" id="panel-deploy">
+  <div class="topbar"><h2>Publier sur GitHub Pages</h2></div>
+  <div class="content">
+    <div class="g2">
+      <div>
+        <div class="st">Configuration <span class="st-line"></span></div>
+        <div class="fl">Portfolio</div><select id="d-portfolio"><option>Sara Benali — Personal</option><option>Yassine Berrada — Client</option><option>Leila Mansouri — Client</option></select>
+        <div class="fl">Nom du repository</div><input id="d-repo" value="portfolio-sara-benali"/>
+        <div class="fl">Username GitHub</div><input id="d-user" placeholder="mon-username"/>
+        <div class="fl">Token GitHub</div><input id="d-token" type="password" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"/>
+        <a href="https://github.com/settings/tokens/new" target="_blank" style="font-size:11px;color:var(--purple2);display:block;margin-bottom:12px">→ Créer un token GitHub</a>
+        <div class="fl">Domaine custom (optionnel)</div><input placeholder="monportfolio.ma"/>
+        <button class="btn btn-primary" onclick="simulateDeploy()">Générer script & URLs</button>
+      </div>
+      <div>
+        <div class="st">Script PowerShell <span class="st-line"></span></div>
+        <div class="code-box" id="deploy-script">Remplis les champs et clique sur "Générer script".</div>
+        <button class="btn btn-sm" style="margin-top:8px" onclick="copyDeployScript()">Copier le script</button>
+        <div id="deploy-result" style="display:none;margin-top:14px">
+          <div class="div"></div>
+          <div style="font-size:13px;font-weight:600;color:var(--teal);margin-bottom:8px">URLs générées ✓</div>
+          <div class="url-row"><span class="url-text" id="pub-url"></span><button class="btn btn-xs" onclick="copyURL()">Copier</button></div>
+          <div class="url-row"><span class="url-text" id="repo-url"></span><button class="btn btn-xs" onclick="copyRepoURL()">Copier</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PANEL: EXPORT ══ -->
+<div class="panel" id="panel-export">
+  <div class="topbar"><h2>Exporter les fichiers</h2></div>
+  <div class="content">
+    <div class="g2">
+      <div>
+        <div class="fl">Sélectionner un portfolio</div><select><option>Sara Benali — Personal</option><option>Yassine Berrada — Client</option></select>
+        <div class="card2">
+          <div style="display:grid;gap:12px">
+            <div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:13px;font-weight:500">index.html</div><div style="font-size:11px;color:var(--text2)">Page web complète</div></div><button class="btn btn-sm" onclick="downloadHTML()">Télécharger</button></div>
+            <div class="div" style="margin:0"></div>
+            <div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:13px;font-weight:500">data.json</div><div style="font-size:11px;color:var(--text2)">Données modifiables</div></div><button class="btn btn-sm" onclick="downloadJSON()">Télécharger</button></div>
+            <div class="div" style="margin:0"></div>
+            <div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:13px;font-weight:500">CV.pdf</div><div style="font-size:11px;color:var(--text2)">Export PDF complet</div></div><button class="btn btn-sm btn-primary" onclick="exportPDF()">Générer PDF</button></div>
+            <div class="div" style="margin:0"></div>
+            <div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:13px;font-weight:500">README.md</div><div style="font-size:11px;color:var(--text2)">Doc GitHub</div></div><button class="btn btn-sm" onclick="downloadReadme()">Télécharger</button></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="st">Instructions <span class="st-line"></span></div>
+        <div class="code-box">1. Télécharger index.html + data.json
+2. Placer dans le même dossier :
+   E:\projets IA\Portfolio_Factory\
+     └── Users\Personal\[ton-nom]\
+           ├── index.html
+           ├── data.json
+           └── assets\
+
+3. Ouvrir data.json avec Notepad++
+   ou VS Code pour modifier
+
+4. Double-clic index.html → aperçu
+5. Upload GitHub → portfolio en ligne
+
+Modification no-code :
+  Changer uniquement data.json
+  Pas besoin de toucher au HTML !</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PANEL: SETTINGS ══ -->
+<div class="panel" id="panel-settings">
+  <div class="topbar"><h2>Paramètres IA</h2><div class="topbar-actions"><button class="btn btn-sm btn-teal" onclick="testAllConnections()">Tester toutes les connexions</button></div></div>
+  <div class="content">
+    <div class="g2">
+      <div>
+        <div class="st">Claude (Anthropic) <span class="st-line"></span></div>
+        <div class="card2" style="margin-bottom:14px">
+          <div class="fl">Clé API</div>
+          <div style="display:flex;gap:6px;margin-bottom:8px"><input id="claude-key" type="password" placeholder="sk-ant-api03-..." style="margin:0;flex:1"/><button class="btn btn-sm btn-primary" onclick="saveKey('claude')">Sauver</button></div>
+          <div class="fl">Modèle</div>
+          <select id="claude-model" style="margin-bottom:6px"><option value="claude-sonnet-4-20250514">claude-sonnet-4 (recommandé)</option><option value="claude-opus-4-20250514">claude-opus-4 (puissant)</option><option value="claude-haiku-4-5-20251001">claude-haiku-4.5 (rapide)</option></select>
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px">
+            <a href="https://console.anthropic.com/" target="_blank" style="color:var(--purple2)">→ console.anthropic.com</a>
+            <span class="badge" id="s-claude-badge">Non configuré</span>
+          </div>
+        </div>
+
+        <div class="st">Manus AI <span class="st-line"></span></div>
+        <div class="card2" style="margin-bottom:14px">
+          <div class="fl">Clé API Manus</div>
+          <div style="display:flex;gap:6px;margin-bottom:8px"><input id="manus-key" type="password" placeholder="Clé API Manus..." style="margin:0;flex:1"/><button class="btn btn-sm" onclick="saveKey('manus')">Sauver</button></div>
+          <div class="fl">Endpoint Manus</div>
+          <input id="manus-endpoint" placeholder="https://api.manus.ai/v1/chat/completions" style="margin-bottom:6px"/>
+          <div class="fl">Modèle Manus</div>
+          <input id="manus-model" value="manus-1" style="margin-bottom:8px"/>
+          <div style="font-size:11px;color:var(--text3);line-height:1.5">Manus n'a pas encore d'API publique officielle. Entre l'endpoint dès qu'il sera disponible sur <a href="https://manus.im" target="_blank" style="color:var(--purple2)">manus.im</a>. Le format est compatible OpenAI.</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;margin-top:8px">
+            <span></span><span class="badge b-amber" id="s-manus-badge">En attente API</span>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="st">OpenAI / GPT <span class="st-line"></span></div>
+        <div class="card2" style="margin-bottom:14px">
+          <div class="fl">Clé API OpenAI</div>
+          <div style="display:flex;gap:6px;margin-bottom:8px"><input id="openai-key" type="password" placeholder="sk-..." style="margin:0;flex:1"/><button class="btn btn-sm" onclick="saveKey('openai')">Sauver</button></div>
+          <div class="fl">Modèle</div>
+          <select id="openai-model" style="margin-bottom:6px"><option>gpt-4o</option><option>gpt-4o-mini</option><option>gpt-4-turbo</option><option>gpt-3.5-turbo</option></select>
+          <a href="https://platform.openai.com/api-keys" target="_blank" style="font-size:11px;color:var(--blue)">→ platform.openai.com</a>
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;margin-top:8px">
+            <span></span><span class="badge" id="s-openai-badge">Non configuré</span>
+          </div>
+        </div>
+
+        <div class="st">IA personnalisée (OpenAI-compatible) <span class="st-line"></span></div>
+        <div class="card2">
+          <div class="fl">Endpoint</div>
+          <input id="custom-endpoint" placeholder="https://api.mistral.ai/v1/chat/completions" style="margin-bottom:8px"/>
+          <div class="fl">Clé API</div>
+          <div style="display:flex;gap:6px;margin-bottom:8px"><input id="custom-key" type="password" placeholder="Clé API..." style="margin:0;flex:1"/><button class="btn btn-sm" onclick="saveKey('custom')">Sauver</button></div>
+          <div class="fl">Nom du modèle</div>
+          <input id="custom-model" placeholder="mistral-large, llama3, gemma..." style="margin-bottom:6px"/>
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;margin-top:4px">
+            <span style="font-size:11px;color:var(--text3)">Compatible : Mistral, LLaMA, Gemma, Groq...</span>
+            <span class="badge" id="s-custom-badge">Non configuré</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="div"></div>
+    <div class="st">Stockage & Préférences <span class="st-line"></span></div>
+    <div class="g2">
+      <div class="card"><div class="fl">Dossier racine Windows</div><input value="E:\projets IA\Portfolio_Factory\"/><button class="btn btn-sm btn-primary" onclick="saveAllSettings()">Sauvegarder tout</button></div>
+      <div class="card">
+        <div style="font-size:13px;font-weight:500;margin-bottom:10px">Statut des connexions</div>
+        <div style="display:grid;gap:6px;font-size:13px">
+          <div style="display:flex;justify-content:space-between"><span>Claude</span><span id="conn-claude" style="color:var(--text3)">Non configuré</span></div>
+          <div style="display:flex;justify-content:space-between"><span>Manus</span><span id="conn-manus" style="color:var(--amber)">En attente</span></div>
+          <div style="display:flex;justify-content:space-between"><span>OpenAI</span><span id="conn-openai" style="color:var(--text3)">Non configuré</span></div>
+          <div style="display:flex;justify-content:space-between"><span>Custom IA</span><span id="conn-custom" style="color:var(--text3)">Non configuré</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end main -->
+</div><!-- end app -->
+
+<!-- MODAL: Ajouter client -->
+<div class="modal-overlay" id="modal-client">
+  <div class="modal">
+    <div class="modal-title">Nouveau client <button class="btn btn-icon" onclick="closeModal('modal-client')"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 2l10 10M12 2L2 12" stroke="currentColor" stroke-width="1.5"/></svg></button></div>
+    <div class="fl">Nom complet</div><input id="mc-name" placeholder="Yassine Berrada"/>
+    <div class="fl">Métier</div><input id="mc-job" placeholder="Ingénieur civil"/>
+    <div class="fl">Email</div><input id="mc-email" placeholder="client@email.com"/>
+    <div class="fl">Template</div>
+    <select id="mc-tpl"><option>template-developer</option><option>template-engineer</option><option>template-designer</option><option>template-business</option><option>template-student</option><option>template-medical</option></select>
+    <div class="fl">Budget estimé (MAD)</div><input id="mc-budget" type="number" placeholder="1500"/>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn" onclick="closeModal('modal-client')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveClient()">Ajouter le client</button>
+    </div>
+  </div>
+</div>
+
+<div class="notif" id="notif"></div>
+
+<script>
+// ══════ STATE ══════
+const S = {
+  claudeKey: localStorage.getItem('pf_claude_key')||'',
+  claudeModel: localStorage.getItem('pf_claude_model')||'claude-sonnet-4-20250514',
+  manusKey: localStorage.getItem('pf_manus_key')||'',
+  manusEndpoint: localStorage.getItem('pf_manus_endpoint')||'',
+  manusModel: localStorage.getItem('pf_manus_model')||'manus-1',
+  openaiKey: localStorage.getItem('pf_openai_key')||'',
+  openaiModel: localStorage.getItem('pf_openai_model')||'gpt-4o',
+  customKey: localStorage.getItem('pf_custom_key')||'',
+  customEndpoint: localStorage.getItem('pf_custom_endpoint')||'',
+  customModel: localStorage.getItem('pf_custom_model')||'',
+  currentAI: 'claude',
+  clients: JSON.parse(localStorage.getItem('pf_clients')||'[]'),
+  tasks: JSON.parse(localStorage.getItem('pf_tasks')||'[]'),
+  aiHistory: JSON.parse(localStorage.getItem('pf_ai_history')||'[]'),
+  lastHTML: null, lastJSON: null,
+  skills: [{name:'Python',level:90},{name:'Machine Learning',level:80},{name:'SQL / Power BI',level:75},{name:'React / TypeScript',level:65}],
+  projects: [{title:'Dashboard BI',description:'Visualisation KPIs temps réel',tech:['Python','Dash','SQL']},{title:'Modèle ML prédictif',description:'Prédiction pannes équipements',tech:['TensorFlow','scikit-learn']}],
+  experiences: [{role:'Développeuse Data',company:'OCP Group',period:'2023–présent',description:'Analyse données, dashboards Power BI, modèles prédictifs.'}]
+};
+
+// ══════ INIT ══════
+window.onload = () => {
+  if(S.claudeKey){document.getElementById('claude-key').value=S.claudeKey}
+  if(S.claudeModel){document.getElementById('claude-model').value=S.claudeModel}
+  if(S.manusKey){document.getElementById('manus-key').value=S.manusKey}
+  if(S.manusEndpoint){document.getElementById('manus-endpoint').value=S.manusEndpoint}
+  if(S.manusModel){document.getElementById('manus-model').value=S.manusModel}
+  if(S.openaiKey){document.getElementById('openai-key').value=S.openaiKey}
+  if(S.customKey){document.getElementById('custom-key').value=S.customKey}
+  if(S.customEndpoint){document.getElementById('custom-endpoint').value=S.customEndpoint}
+  if(S.customModel){document.getElementById('custom-model').value=S.customModel}
+  updateAllStatus();
+  renderSkillsEditor();
+  renderProjectsEditor();
+  renderExpEditor();
+  renderClients();
+  renderTasks();
+  updateAITabDots();
+};
+
+// ══════ NAV ══════
+function nav(el,id){
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('panel-'+id).classList.add('active');
+}
+function switchTab(el,id){
+  el.closest('.main, .panel').querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  el.closest('.main, .panel').querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(id).classList.add('active');
+}
+
+// ══════ AI PROVIDER ══════
+function selectAI(el,ai){
+  document.querySelectorAll('.ai-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  S.currentAI=ai;
+  const badge=document.getElementById('ai-status-badge');
+  const lbl=document.getElementById('ai-model-label');
+  const names={claude:'Claude',manus:'Manus AI',openai:'OpenAI / GPT',custom:'Custom IA'};
+  const models={claude:S.claudeModel,manus:S.manusModel||'manus-1',openai:S.openaiModel||'gpt-4o',custom:S.customModel||'?'};
+  badge.textContent=names[ai];
+  lbl.textContent='Modèle actif : '+models[ai];
+}
+
+function updateAITabDots(){
+  const setDot=(id,on)=>{const d=document.getElementById(id);if(d){d.className='ai-status-dot'+(on?' on':'')}};
+  setDot('dot-tab-claude',!!S.claudeKey);
+  setDot('dot-tab-manus',!!S.manusEndpoint&&!!S.manusKey);
+  setDot('dot-tab-openai',!!S.openaiKey);
+  setDot('dot-tab-custom',!!S.customKey&&!!S.customEndpoint);
+  const sd=id=>document.getElementById(id);
+  if(sd('dot-claude'))sd('dot-claude').className='ai-dot'+(S.claudeKey?' on':'');
+  if(sd('dot-manus'))sd('dot-manus').className='ai-dot'+(S.manusEndpoint&&S.manusKey?' on':' warn');
+  if(sd('dot-custom'))sd('dot-custom').className='ai-dot'+(S.customKey?' on':'');
+}
+
+// ══════ SAVE KEYS ══════
+function saveKey(p){
+  if(p==='claude'){S.claudeKey=document.getElementById('claude-key').value.trim();S.claudeModel=document.getElementById('claude-model').value;localStorage.setItem('pf_claude_key',S.claudeKey);localStorage.setItem('pf_claude_model',S.claudeModel);}
+  else if(p==='manus'){S.manusKey=document.getElementById('manus-key').value.trim();S.manusEndpoint=document.getElementById('manus-endpoint').value.trim();S.manusModel=document.getElementById('manus-model').value.trim();localStorage.setItem('pf_manus_key',S.manusKey);localStorage.setItem('pf_manus_endpoint',S.manusEndpoint);localStorage.setItem('pf_manus_model',S.manusModel);}
+  else if(p==='openai'){S.openaiKey=document.getElementById('openai-key').value.trim();S.openaiModel=document.getElementById('openai-model').value;localStorage.setItem('pf_openai_key',S.openaiKey);localStorage.setItem('pf_openai_model',S.openaiModel);}
+  else{S.customKey=document.getElementById('custom-key').value.trim();S.customEndpoint=document.getElementById('custom-endpoint').value.trim();S.customModel=document.getElementById('custom-model').value.trim();localStorage.setItem('pf_custom_key',S.customKey);localStorage.setItem('pf_custom_endpoint',S.customEndpoint);localStorage.setItem('pf_custom_model',S.customModel);}
+  updateAllStatus();showNotif('✓ Clé '+p+' sauvegardée !');
+}
+
+function saveAllSettings(){Object.keys(S).forEach(k=>{if(typeof S[k]==='string')localStorage.setItem('pf_'+k,S[k])});showNotif('✓ Tous les paramètres sauvegardés !');}
+
+function updateAllStatus(){
+  const set=(id,ok,msg)=>{const el=document.getElementById(id);if(!el)return;el.textContent=ok?'Connecté ✓':msg||'Non configuré';el.className='badge '+(ok?'b-teal':'b-red')};
+  const setTxt=(id,ok,msg)=>{const el=document.getElementById(id);if(!el)return;el.textContent=ok?'Connecté ✓':msg||'Non configuré';el.style.color=ok?'var(--teal)':'var(--text3)'};
+  set('s-claude-badge',!!S.claudeKey);
+  set('s-manus-badge',!!S.manusKey&&!!S.manusEndpoint,'En attente API');
+  if(document.getElementById('s-manus-badge')&&!S.manusKey){document.getElementById('s-manus-badge').className='badge b-amber';document.getElementById('s-manus-badge').textContent='En attente API'}
+  set('s-openai-badge',!!S.openaiKey);
+  set('s-custom-badge',!!S.customKey&&!!S.customEndpoint);
+  setTxt('conn-claude',!!S.claudeKey);
+  setTxt('conn-manus',!!S.manusKey&&!!S.manusEndpoint,'En attente');
+  if(document.getElementById('conn-manus')&&!S.manusKey){document.getElementById('conn-manus').style.color='var(--amber)';document.getElementById('conn-manus').textContent='En attente API'}
+  setTxt('conn-openai',!!S.openaiKey);
+  setTxt('conn-custom',!!S.customKey);
+  updateAITabDots();
+}
+
+// ══════ CALL AI ══════
+async function callAI(){
+  const type=document.getElementById('ai-type').value;
+  const sector=document.getElementById('ai-sector').value;
+  const extra=document.getElementById('ai-prompt').value;
+  const lang=document.getElementById('ai-lang').value;
+  const tone=document.getElementById('ai-tone').value;
+  const out=document.getElementById('ai-output');
+  const prompt=buildPrompt(type,sector,extra,lang,tone);
+  out.innerHTML='<span class="ai-thinking">Génération en cours<span class="dots"><span>.</span><span>.</span><span>.</span></span></span>';
+  out.classList.add('loading');
+  if(S.currentAI==='claude'){if(!S.claudeKey){out.textContent='⚠ Clé Claude manquante → Paramètres IA';out.classList.remove('loading');return;}await callClaude(prompt,out);}
+  else if(S.currentAI==='manus'){if(!S.manusEndpoint||!S.manusKey){out.textContent='⚠ Manus AI non configuré.\n→ Va dans Paramètres IA et entre l\'endpoint Manus + ta clé API.\n\nNote : Manus n\'a pas encore d\'API publique officielle. Quand elle sera disponible sur manus.im, entre simplement l\'endpoint et la clé ici.';out.classList.remove('loading');return;}await callOpenAICompat(prompt,out,S.manusEndpoint,S.manusKey,S.manusModel||'manus-1');}
+  else if(S.currentAI==='openai'){if(!S.openaiKey){out.textContent='⚠ Clé OpenAI manquante → Paramètres IA';out.classList.remove('loading');return;}await callOpenAICompat(prompt,out,'https://api.openai.com/v1/chat/completions',S.openaiKey,S.openaiModel||'gpt-4o');}
+  else{if(!S.customKey||!S.customEndpoint){out.textContent='⚠ IA personnalisée non configurée → Paramètres IA';out.classList.remove('loading');return;}await callOpenAICompat(prompt,out,S.customEndpoint,S.customKey,S.customModel);}
+  out.classList.remove('loading');
+}
+
+async function callAIAll(){
+  showNotif('Fonctionnalité : configure d\'abord 2+ IA dans Paramètres, puis génère séquentiellement.','warn');
+}
+
+function buildPrompt(type,sector,extra,lang,tone){
+  const l=lang||'Français';const t=tone||'Professionnel';
+  const base=`Tu es un expert en création de portfolios professionnels. Réponds en ${l}, ton ${t}.\nSecteur : ${sector}. Infos : ${extra||'non précisé'}\n\n`;
+  if(type.includes('Portfolio'))return base+'Génère un portfolio HTML complet, moderne, responsive, avec animations CSS légères. Inclus aussi un fichier data.json structuré. Design professionnel adapté au secteur.';
+  if(type.includes('Bio'))return base+'Génère une bio professionnelle optimisée SEO en 4 phrases percutantes avec mots-clés métier.';
+  if(type.includes('projet'))return base+'Génère une description de projet percutante : contexte, technologies, résultats mesurables.';
+  if(type.includes('Comp'))return base+'Liste 10 compétences clés avec niveau en % pour ce secteur. Format : Compétence - XX%';
+  if(type.includes('propos'))return base+'Génère un texte "À propos" engageant de 150 mots pour portfolio.';
+  if(type.includes('motivation'))return base+'Génère une lettre de motivation professionnelle complète pour ce profil.';
+  if(type.includes('CV'))return base+'Génère un résumé CV une page structuré et impactant.';
+  if(type.includes('SEO'))return base+'Donne 10 conseils SEO précis pour optimiser ce portfolio dans Google.';
+  if(type.includes('concurrentielle'))return base+'Analyse le marché et les tendances portfolios pour ce secteur en 2026.';
+  if(type.includes('branding'))return base+'Crée une stratégie de personal branding complète pour ce profil.';
+  return base+'Génère du contenu professionnel adapté pour ce portfolio.';
+}
+
+async function callClaude(prompt,outEl){
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':S.claudeKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:S.claudeModel||'claude-sonnet-4-20250514',max_tokens:2000,messages:[{role:'user',content:prompt}]})});
+    if(!res.ok){const e=await res.json();outEl.textContent='⚠ Erreur Claude '+(res.status)+': '+(e.error?.message||'Erreur inconnue');return;}
+    const data=await res.json();
+    outEl.textContent=data.content?.[0]?.text||'Aucune réponse.';
+  }catch(e){outEl.textContent='⚠ Erreur réseau : '+e.message+'\n\nVérifie que tu as bien entré ta clé API dans Paramètres IA.';}
+}
+
+async function callOpenAICompat(prompt,outEl,endpoint,key,model){
+  try{
+    const res=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:model||'gpt-4o',max_tokens:2000,messages:[{role:'user',content:prompt}]})});
+    if(!res.ok){const e=await res.json();outEl.textContent='⚠ Erreur ('+res.status+'): '+(e.error?.message||JSON.stringify(e));return;}
+    const data=await res.json();
+    outEl.textContent=data.choices?.[0]?.message?.content||data.content?.[0]?.text||JSON.stringify(data);
+  }catch(e){outEl.textContent='⚠ Erreur réseau : '+e.message;}
+}
+
+async function testAIConnection(){
+  const out=document.getElementById('ai-output');
+  out.textContent='Test de connexion en cours...';
+  if(S.currentAI==='claude'){if(!S.claudeKey){out.textContent='⚠ Clé Claude manquante.';return;}await callClaude('Dis juste "Connexion Claude OK ✓" en une ligne.',out);}
+  else if(S.currentAI==='manus'){if(!S.manusEndpoint||!S.manusKey){out.textContent='⚠ Manus non configuré. Entre l\'endpoint et la clé dans Paramètres IA.';return;}await callOpenAICompat('Dis juste "Connexion Manus OK ✓"',out,S.manusEndpoint,S.manusKey,S.manusModel);}
+  else if(S.currentAI==='openai'){if(!S.openaiKey){out.textContent='⚠ Clé OpenAI manquante.';return;}await callOpenAICompat('Dis juste "Connexion OpenAI OK ✓"',out,'https://api.openai.com/v1/chat/completions',S.openaiKey,S.openaiModel);}
+  else{if(!S.customKey||!S.customEndpoint){out.textContent='⚠ IA custom non configurée.';return;}await callOpenAICompat('Dis juste "Connexion OK ✓"',out,S.customEndpoint,S.customKey,S.customModel);}
+}
+
+async function testAllConnections(){showNotif('Test toutes IA → configure d\'abord dans Paramètres IA, puis utilise "Tester connexion" dans Générer avec IA.','warn');}
+
+function clearAIOutput(){document.getElementById('ai-output').textContent='Le résultat apparaîtra ici...';}
+function copyAIOutput(){navigator.clipboard?.writeText(document.getElementById('ai-output').textContent||'');showNotif('✓ Résultat copié !');}
+function injectToEditor(){const txt=document.getElementById('ai-output').textContent;if(txt.length>10){document.getElementById('e-bio').value=txt.substring(0,400);showNotif('✓ Injecté dans l\'éditeur !');}else showNotif('Génère d\'abord du contenu.','warn');}
+function injectToCreate(){const txt=document.getElementById('ai-output').textContent;if(txt.length>10){document.getElementById('c-bio').value=txt.substring(0,300);showNotif('✓ Injecté dans Créer !');}else showNotif('Génère d\'abord du contenu.','warn');}
+function saveAIHistory(){
+  const txt=document.getElementById('ai-output').textContent;if(txt.length<10){showNotif('Rien à sauvegarder.','warn');return;}
+  S.aiHistory.unshift({text:txt.substring(0,200)+'...',date:new Date().toLocaleDateString('fr'),ai:S.currentAI});
+  if(S.aiHistory.length>10)S.aiHistory.pop();
+  localStorage.setItem('pf_ai_history',JSON.stringify(S.aiHistory));
+  showNotif('✓ Sauvegardé dans l\'historique !');
+  renderAIHistory();
+}
+function renderAIHistory(){
+  const wrap=document.getElementById('ai-history-wrap');
+  const list=document.getElementById('ai-history-list');
+  if(!S.aiHistory.length){wrap.style.display='none';return;}
+  wrap.style.display='block';
+  list.innerHTML=S.aiHistory.map((h,i)=>`<div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:12px"><span class="badge b-purple">${h.ai}</span> <span style="color:var(--text2);margin-left:6px">${h.date}</span><div style="color:var(--text);margin-top:4px">${h.text}</div></div>`).join('');
+}
+
+// ══════ BUILD PORTFOLIO ══════
+function buildPortfolio(){
+  buildPortfolioSilent();
+  document.getElementById('create-output').style.display='block';
+  document.getElementById('create-code').textContent=(S.lastHTML||'').substring(0,1400)+'\n\n... (télécharge pour le code complet)';
+  showNotif('✓ Portfolio créé !');
+}
+function buildPortfolioSilent(){
+  const d={
+    name:document.getElementById('c-name').value||'Mon Portfolio',
+    title:document.getElementById('c-title').value||'Professionnel',
+    bio:document.getElementById('c-bio').value||'Bio professionnelle.',
+    email:document.getElementById('c-email').value||'',
+    phone:document.getElementById('c-phone').value||'',
+    github:document.getElementById('c-github').value||'',
+    linkedin:document.getElementById('c-linkedin').value||'',
+    city:document.getElementById('c-city').value||'',
+    skills:(document.getElementById('c-skills').value||'Compétence 1,Compétence 2').split(',').map(s=>({name:s.trim(),level:Math.floor(Math.random()*25)+70})),
+    projects:(document.getElementById('c-projects').value||'Projet 1,Projet 2').split(',').map((p,i)=>({title:p.trim(),description:'Description du projet '+(i+1)+'.',tech:['HTML','CSS','JavaScript'],url:''})),
+    experiences:(document.getElementById('c-exp').value||'Expérience').split(',').map(e=>({role:e.trim(),company:'Entreprise',period:'2023–présent',description:'Description du rôle.'})),
+    certifications:(document.getElementById('c-certs').value||'').split(',').map(c=>c.trim()).filter(Boolean)
+  };
+  S.lastJSON=d;
+  S.lastHTML=generateHTML(d);
+}
+
+function generateHTML(d){
+  const colors={purple:'#7c6af7',blue:'#4a90e8',teal:'#1cb88a',dark:'#ffffff',white:'#6c5ce7'};
+  const accent=colors[document.getElementById('c-color')?.value]||'#7c6af7';
+  const skillBars=d.skills.map(s=>`<div class="sk"><div class="sk-top"><span>${s.name}</span><span>${s.level}%</span></div><div class="sk-bar"><div class="sk-fill" style="width:${s.level}%"></div></div></div>`).join('');
+  const projCards=d.projects.map(p=>`<div class="proj"><h3>${p.title}</h3><p>${p.description}</p><div class="tags">${p.tech.map(t=>`<span class="tag">${t}</span>`).join('')}</div>${p.url?`<a href="${p.url}" target="_blank">Voir →</a>`:''}</div>`).join('');
+  const expItems=d.experiences.map(e=>`<div class="exp-item"><div class="exp-top"><strong>${e.role}</strong><span>${e.period}</span></div><div style="color:#9898b0;font-size:13px">${e.company}</div><p>${e.description}</p></div>`).join('');
+  const certsHtml=d.certifications.length?`<section id="certs"><h2>Certifications</h2><div class="tags-big">${d.certifications.map(c=>`<span class="cert-tag">${c}</span>`).join('')}</div></section>`:'';
+  return`<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="${d.name} - ${d.title} - Portfolio professionnel">
+<title>${d.name} | ${d.title}</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--accent:${accent};--bg:#0c0c10;--bg2:#13131a;--bg3:#1a1a24;--text:#eeeef5;--text2:#8888a8}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);scroll-behavior:smooth}
+nav{position:fixed;top:0;left:0;right:0;padding:14px 5%;display:flex;justify-content:space-between;align-items:center;background:rgba(12,12,16,.9);backdrop-filter:blur(10px);z-index:100;border-bottom:1px solid rgba(255,255,255,.05)}
+.nav-logo{font-size:16px;font-weight:700;color:var(--accent)}
+.nav-links{display:flex;gap:24px}
+.nav-links a{font-size:13px;color:var(--text2);text-decoration:none;transition:color .2s}
+.nav-links a:hover{color:var(--text)}
+header{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:6rem 2rem 4rem;background:radial-gradient(ellipse at 50% 40%,rgba(${parseInt(accent.slice(1,3),16)},${parseInt(accent.slice(3,5),16)},${parseInt(accent.slice(5,7),16)},.08) 0%,transparent 70%)}
+.tag-hero{background:rgba(${parseInt(accent.slice(1,3),16)},${parseInt(accent.slice(3,5),16)},${parseInt(accent.slice(5,7),16)},.2);color:var(--accent);padding:6px 18px;border-radius:20px;font-size:13px;display:inline-block;margin-bottom:1.5rem;animation:fadeUp .6s ease both}
+h1{font-size:clamp(2.2rem,5vw,3.8rem);font-weight:800;line-height:1.15;margin-bottom:1rem;animation:fadeUp .7s .1s ease both}
+h1 span{color:var(--accent)}
+.subtitle{font-size:1.1rem;color:var(--text2);margin-bottom:2rem;animation:fadeUp .7s .2s ease both}
+.hero-meta{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;font-size:13px;color:var(--text2);margin-bottom:2rem;animation:fadeUp .7s .3s ease both}
+.cta-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;animation:fadeUp .7s .4s ease both}
+.btn-p{background:var(--accent);color:#fff;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:500;font-size:14px;display:inline-block;transition:transform .2s,opacity .2s}
+.btn-p:hover{transform:translateY(-2px);opacity:.9}
+.btn-o{background:transparent;color:var(--text);padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:500;font-size:14px;display:inline-block;border:1px solid rgba(255,255,255,.2);transition:background .2s}
+.btn-o:hover{background:rgba(255,255,255,.06)}
+section{padding:5rem 5%;max-width:1100px;margin:0 auto}
+h2{font-size:2rem;font-weight:700;margin-bottom:2.5rem;text-align:center}
+h2 span{color:var(--accent)}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:start}
+@media(max-width:768px){.about-grid{grid-template-columns:1fr}nav .nav-links{display:none}}
+.about-text{font-size:1.05rem;line-height:1.85;color:var(--text2)}
+.contact-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:1.5rem}
+.contact-row a{padding:8px 16px;background:rgba(255,255,255,.05);color:var(--accent);border-radius:6px;font-size:13px;text-decoration:none;border:1px solid rgba(255,255,255,.08);transition:background .2s}
+.contact-row a:hover{background:rgba(255,255,255,.1)}
+.sk{margin-bottom:16px}
+.sk-top{display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;color:var(--text2)}
+.sk-bar{height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden}
+.sk-fill{height:100%;background:var(--accent);border-radius:3px;transition:width 1.2s ease}
+.proj-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:1.5rem}
+.proj{background:var(--bg2);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:1.5rem;transition:border-color .2s,transform .2s}
+.proj:hover{border-color:var(--accent);transform:translateY(-3px)}
+.proj h3{margin-bottom:.6rem;font-size:1.05rem}
+.proj p{color:var(--text2);font-size:.9rem;margin-bottom:1rem;line-height:1.65}
+.proj a{font-size:13px;color:var(--accent);text-decoration:none}
+.tags{display:flex;gap:6px;flex-wrap:wrap}
+.tag{padding:3px 10px;background:rgba(255,255,255,.06);color:var(--text2);border-radius:4px;font-size:11px}
+.exp-list{display:grid;gap:1rem}
+.exp-item{background:var(--bg2);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:1.25rem}
+.exp-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;flex-wrap:wrap;gap:6px}
+.exp-top strong{font-size:14px}
+.exp-top span{font-size:12px;color:var(--text2)}
+.exp-item p{font-size:13px;color:var(--text2);margin-top:6px;line-height:1.6}
+.tags-big{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.cert-tag{padding:8px 18px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;font-size:13px;color:var(--text)}
+footer{text-align:center;padding:2.5rem;color:var(--text2);font-size:13px;border-top:1px solid rgba(255,255,255,.05)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+<nav><div class="nav-logo">${d.name.split(' ')[0]}</div><div class="nav-links"><a href="#about">À propos</a><a href="#projects">Projets</a><a href="#exp">Expériences</a><a href="#contact">Contact</a></div></nav>
+<header>
+  <div>
+    <div class="tag-hero">Portfolio Professionnel 2026</div>
+    <h1>Bonjour, je suis<br><span>${d.name}</span></h1>
+    <p class="subtitle">${d.title}</p>
+    <div class="hero-meta">${d.city?`<span>📍 ${d.city}</span>`:''}${d.email?`<span>✉ ${d.email}</span>`:''}</div>
+    <div class="cta-row">
+      ${d.email?`<a href="mailto:${d.email}" class="btn-p">Me contacter</a>`:''}
+      ${d.github?`<a href="${d.github}" class="btn-o" target="_blank">GitHub</a>`:''}
+      ${d.linkedin?`<a href="${d.linkedin}" class="btn-o" target="_blank">LinkedIn</a>`:''}
+    </div>
+  </div>
+</header>
+<section id="about"><h2>À <span>propos</span></h2>
+  <div class="about-grid">
+    <div><p class="about-text">${d.bio}</p><div class="contact-row">${d.linkedin?`<a href="${d.linkedin}" target="_blank">LinkedIn</a>`:''} ${d.email?`<a href="mailto:${d.email}">Email</a>`:''} ${d.phone?`<a href="tel:${d.phone}">Téléphone</a>`:''}</div></div>
+    <div>${skillBars}</div>
+  </div>
+</section>
+<section id="projects"><h2>Mes <span>Projets</span></h2><div class="proj-grid">${projCards}</div></section>
+<section id="exp"><h2>Mes <span>Expériences</span></h2><div class="exp-list">${expItems}</div></section>
+${certsHtml}
+<section id="contact"><h2><span>Contact</span></h2><div style="text-align:center"><p style="color:var(--text2);margin-bottom:1.5rem">Ouverts aux opportunités · Collaboration · Freelance</p><div class="cta-row">${d.email?`<a href="mailto:${d.email}" class="btn-p">Envoyer un email</a>`:''}</div></div></section>
+<footer>Généré avec Portfolio Factory v2.0 · ${new Date().getFullYear()}</footer>
+<script>
+const fills=document.querySelectorAll('.sk-fill');const ob=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){const w=e.target.style.width;e.target.style.width='0';setTimeout(()=>e.target.style.width=w,50)}})},{threshold:.3});fills.forEach(f=>ob.observe(f));
+<\/script>
+</body></html>`;
+}
+
+// ══════ DOWNLOAD ══════
+function downloadHTML(){if(!S.lastHTML){buildPortfolioSilent()}dl('index.html',S.lastHTML,'text/html')}
+function downloadJSON(){if(!S.lastJSON){buildPortfolioSilent()}dl('data.json',JSON.stringify(S.lastJSON,null,2),'application/json')}
+function downloadReadme(){const md=`# Portfolio — ${document.getElementById('c-name')?.value||'Mon Portfolio'}\n\nGénéré avec Portfolio Factory v2.0\n\n## Structure\n\`\`\`\nPortfolio_Factory/\n └── Users/\n      └── Personal/\n           ├── index.html\n           └── data.json\n\`\`\`\n\n## Modification no-code\nModifie uniquement \`data.json\` puis recharge \`index.html\`.\n`;dl('README.md',md,'text/markdown')}
+function dl(name,content,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type}));a.download=name;a.click();showNotif('✓ '+name+' téléchargé !')}
+function copyCode(){navigator.clipboard?.writeText(S.lastHTML||'');showNotif('✓ Code copié !')}
+
+// ══════ PREVIEW ══════
+function refreshPreview(){
+  if(!S.lastHTML){buildPortfolioSilent()}
+  const fr=document.getElementById('preview-frame');
+  fr.srcdoc=S.lastHTML;
+  showNotif('✓ Aperçu mis à jour');
+}
+function setPreviewSize(w,h){const wr=document.getElementById('preview-wrap');wr.style.width=w;if(h!=='100%')wr.style.height=h;}
+
+// ══════ PDF EXPORT ══════
+function exportPDF(){
+  const {jsPDF}=window.jspdf;
+  if(!jsPDF){showNotif('⚠ Bibliothèque PDF en cours de chargement...','warn');setTimeout(exportPDF,1000);return;}
+  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const name=document.getElementById('e-name')?.value||document.getElementById('c-name')?.value||'Prénom Nom';
+  const title=document.getElementById('e-title')?.value||document.getElementById('c-title')?.value||'Professionnel';
+  const bio=document.getElementById('e-bio')?.value||document.getElementById('c-bio')?.value||'';
+  const email=document.getElementById('e-email')?.value||document.getElementById('c-email')?.value||'';
+  const city=document.getElementById('e-city')?.value||document.getElementById('c-city')?.value||'';
+  const gh=document.getElementById('e-gh')?.value||document.getElementById('c-github')?.value||'';
+  const accentHex=document.getElementById('pdf-color')?.value||'#7c6af7';
+  const ar=parseInt(accentHex.slice(1,3),16)/255,ag=parseInt(accentHex.slice(3,5),16)/255,ab=parseInt(accentHex.slice(5,7),16)/255;
+  const pw=210,ph=297,ml=18,mr=18,mt=20;let y=mt;
+  const lineW=pw-ml-mr;
+  // HEADER BAR
+  doc.setFillColor(ar*255,ag*255,ab*255);doc.rect(0,0,pw,28,'F');
+  doc.setTextColor(255,255,255);doc.setFont('helvetica','bold');doc.setFontSize(20);doc.text(name,ml,13);
+  doc.setFont('helvetica','normal');doc.setFontSize(11);doc.text(title,ml,21);
+  y=35;
+  // CONTACT LINE
+  doc.setTextColor(80,80,80);doc.setFontSize(9);
+  let contactLine=[email,city,gh].filter(Boolean).join('  |  ');
+  doc.text(contactLine,ml,y);y+=8;
+  // DIVIDER
+  doc.setDrawColor(ar*255,ag*255,ab*255);doc.setLineWidth(.5);doc.line(ml,y,pw-mr,y);y+=5;
+  // SECTION helper
+  const section=(title2)=>{doc.setFont('helvetica','bold');doc.setFontSize(11);doc.setTextColor(ar*255,ag*255,ab*255);doc.text(title2.toUpperCase(),ml,y);y+=2;doc.setDrawColor(ar*255,ag*255,ab*255);doc.line(ml,y,pw-mr,y);y+=5;doc.setTextColor(40,40,40);doc.setFont('helvetica','normal');doc.setFontSize(10)};
+  // BIO
+  if(bio){section('À PROPOS');const lines=doc.splitTextToSize(bio,lineW);doc.text(lines,ml,y);y+=lines.length*5+6;}
+  // SKILLS
+  section('COMPÉTENCES');
+  S.skills.forEach(sk=>{
+    if(y>270){doc.addPage();y=20}
+    doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(60,60,60);doc.text(sk.name,ml,y);doc.text(sk.level+'%',pw-mr,y,'right');
+    y+=3;doc.setFillColor(230,230,230);doc.rect(ml,y,lineW,3,'F');doc.setFillColor(ar*255,ag*255,ab*255);doc.rect(ml,y,lineW*sk.level/100,3,'F');y+=7;
+  });y+=3;
+  // PROJECTS
+  if(S.projects.length){
+    section('PROJETS');
+    S.projects.forEach(p=>{if(y>265){doc.addPage();y=20}doc.setFont('helvetica','bold');doc.setFontSize(10);doc.text(p.title,ml,y);doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(80,80,80);doc.text(p.tech.join(', '),ml+60,y);y+=4;const dl2=doc.splitTextToSize(p.description,lineW);doc.text(dl2,ml,y);y+=dl2.length*4+5;});
+  }
+  // EXPERIENCES
+  if(S.experiences.length){
+    section('EXPÉRIENCES');
+    S.experiences.forEach(e=>{if(y>265){doc.addPage();y=20}doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(40,40,40);doc.text(e.role,ml,y);doc.setFont('helvetica','normal');doc.setTextColor(100,100,100);doc.text(e.company+' · '+e.period,pw-mr,y,'right');y+=4;doc.setFontSize(9);const dl2=doc.splitTextToSize(e.description,lineW);doc.text(dl2,ml,y);y+=dl2.length*4+6;});
+  }
+  // FOOTER
+  doc.setFontSize(8);doc.setTextColor(180,180,180);doc.text('Généré avec Portfolio Factory v2.0 · '+new Date().getFullYear(),pw/2,ph-8,'center');
+  const fname=document.getElementById('pdf-filename')?.value||'CV-Portfolio';
+  doc.save(fname+'.pdf');showNotif('✓ PDF généré et téléchargé !');
+}
+
+function previewPDF(){showNotif('Aperçu PDF : utilise le bouton "Générer PDF" pour télécharger le vrai fichier.','warn')}
+
+// ══════ EDITOR ══════
+function renderSkillsEditor(){
+  const el=document.getElementById('skills-editor');if(!el)return;
+  el.innerHTML=S.skills.map((s,i)=>`<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+    <input value="${s.name}" style="flex:1;margin:0" onchange="S.skills[${i}].name=this.value"/>
+    <input type="number" value="${s.level}" min="1" max="100" style="width:65px;margin:0" onchange="S.skills[${i}].level=+this.value"/>
+    <div style="flex:1"><div class="prog-bar" style="margin-top:0"><div class="prog-fill" style="width:${s.level}%"></div></div></div>
+    <button class="btn btn-xs btn-red" onclick="S.skills.splice(${i},1);renderSkillsEditor()">×</button>
+  </div>`).join('');
+}
+function addSkill(){const n=document.getElementById('new-skill-name').value.trim(),l=+document.getElementById('new-skill-lvl').value||75;if(!n){showNotif('Entre un nom !','warn');return;}S.skills.push({name:n,level:l});renderSkillsEditor();document.getElementById('new-skill-name').value='';showNotif('✓ Compétence ajoutée !');}
+function renderProjectsEditor(){
+  const el=document.getElementById('projects-editor');if(!el)return;
+  el.innerHTML=S.projects.map((p,i)=>`<div class="card" style="margin-bottom:10px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="font-size:13px;font-weight:500">${p.title}</span><button class="btn btn-xs btn-red" onclick="S.projects.splice(${i},1);renderProjectsEditor()">Supprimer</button></div>
+    <input value="${p.title}" placeholder="Titre" style="margin-bottom:6px" onchange="S.projects[${i}].title=this.value"/>
+    <textarea style="min-height:52px" onchange="S.projects[${i}].description=this.value">${p.description}</textarea>
+  </div>`).join('');
+}
+function addProject(){const t=document.getElementById('np-title').value.trim(),d=document.getElementById('np-desc').value.trim(),tc=document.getElementById('np-tech').value;if(!t)return;S.projects.push({title:t,description:d,tech:tc.split(',').map(x=>x.trim()),url:''});renderProjectsEditor();document.getElementById('np-title').value='';document.getElementById('np-desc').value='';showNotif('✓ Projet ajouté !');}
+function renderExpEditor(){
+  const el=document.getElementById('exp-editor');if(!el)return;
+  el.innerHTML=S.experiences.map((e,i)=>`<div class="card" style="margin-bottom:10px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="font-size:13px;font-weight:500">${e.role} — ${e.company}</span><button class="btn btn-xs btn-red" onclick="S.experiences.splice(${i},1);renderExpEditor()">Supprimer</button></div>
+    <input value="${e.role}" style="margin-bottom:6px" onchange="S.experiences[${i}].role=this.value"/>
+    <input value="${e.company}" style="margin-bottom:6px" onchange="S.experiences[${i}].company=this.value"/>
+    <input value="${e.period}" style="margin-bottom:6px" onchange="S.experiences[${i}].period=this.value"/>
+  </div>`).join('');
+}
+function addExp(){const r=document.getElementById('ne-role').value.trim(),c=document.getElementById('ne-company').value.trim(),p=document.getElementById('ne-period').value.trim(),d=document.getElementById('ne-desc').value.trim();if(!r)return;S.experiences.push({role:r,company:c,period:p,description:d});renderExpEditor();document.getElementById('ne-role').value='';document.getElementById('ne-company').value='';showNotif('✓ Expérience ajoutée !');}
+function saveEditor(){localStorage.setItem('pf_editor',JSON.stringify({name:document.getElementById('e-name').value,title:document.getElementById('e-title').value,bio:document.getElementById('e-bio').value,skills:S.skills,projects:S.projects,experiences:S.experiences}));document.getElementById('editor-saved').style.display='inline';showNotif('✓ Portfolio sauvegardé !');}
+
+// ══════ CLIENTS ══════
+function openAddClientModal(){document.getElementById('modal-client').classList.add('open')}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+function saveClient(){
+  const name=document.getElementById('mc-name').value.trim();if(!name){showNotif('Entre un nom !','warn');return;}
+  S.clients.push({name,job:document.getElementById('mc-job').value,email:document.getElementById('mc-email').value,tpl:document.getElementById('mc-tpl').value,budget:document.getElementById('mc-budget').value,status:'En cours'});
+  localStorage.setItem('pf_clients',JSON.stringify(S.clients));
+  closeModal('modal-client');renderClients();document.getElementById('mc-name').value='';
+  showNotif('✓ Client ajouté !');
+}
+function renderClients(){
+  const list=document.getElementById('clients-list');if(!list)return;
+  const base=`<div class="client-row"><div style="display:flex;align-items:center;gap:10px"><div class="avatar">YB</div><div><div style="font-size:13px;font-weight:500">Yassine Berrada</div><div style="font-size:11px;color:var(--text2)">Ingénieur civil · template-engineer</div></div></div><div style="display:flex;align-items:center;gap:7px"><span class="badge b-teal">Publié</span><button class="btn btn-xs">PDF</button><button class="btn btn-xs">Modifier</button></div></div><div class="client-row"><div style="display:flex;align-items:center;gap:10px"><div class="avatar" style="background:var(--teal3);color:var(--teal)">LM</div><div><div style="font-size:13px;font-weight:500">Leila Mansouri</div><div style="font-size:11px;color:var(--text2)">Designer UX · template-designer</div></div></div><div style="display:flex;align-items:center;gap:7px"><span class="badge b-teal">Publié</span><button class="btn btn-xs">PDF</button><button class="btn btn-xs">Modifier</button></div></div><div class="client-row"><div style="display:flex;align-items:center;gap:10px"><div class="avatar" style="background:var(--amber2);color:var(--amber)">AK</div><div><div style="font-size:13px;font-weight:500">Amine Khalil</div><div style="font-size:11px;color:var(--text2)">Développeur fullstack · template-developer</div></div></div><div style="display:flex;align-items:center;gap:7px"><span class="badge b-amber">En cours</span><button class="btn btn-xs">PDF</button><button class="btn btn-xs">Modifier</button></div></div><div class="client-row"><div style="display:flex;align-items:center;gap:10px"><div class="avatar" style="background:var(--red2);color:var(--red)">NB</div><div><div style="font-size:13px;font-weight:500">Nadia Bensalem</div><div style="font-size:11px;color:var(--text2)">Freelance marketing · template-business</div></div></div><div style="display:flex;align-items:center;gap:7px"><span class="badge b-amber">En cours</span><button class="btn btn-xs">PDF</button><button class="btn btn-xs">Modifier</button></div></div>`;
+  const extras=S.clients.map(c=>{const init=c.name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();return`<div class="client-row"><div style="display:flex;align-items:center;gap:10px"><div class="avatar">${init}</div><div><div style="font-size:13px;font-weight:500">${c.name}</div><div style="font-size:11px;color:var(--text2)">${c.job} · ${c.tpl}</div></div></div><div style="display:flex;align-items:center;gap:7px"><span class="badge b-amber">${c.status}</span><button class="btn btn-xs" onclick="exportPDF()">PDF</button><button class="btn btn-xs">Modifier</button></div></div>`;}).join('');
+  list.innerHTML=base+extras;
+  const total=4+S.clients.length;
+  document.getElementById('ct-total').textContent=total;
+  document.getElementById('nb-clients').textContent=total;
+  const revEl=document.getElementById('ct-rev');if(revEl)revEl.textContent=(3500+S.clients.reduce((a,c)=>a+(+c.budget||0),0)).toLocaleString('fr');
+}
+
+// ══════ TASKS ══════
+function renderTasks(){
+  const list=document.getElementById('task-list');if(!list||!S.tasks.length)return;
+  const pmap={Urgent:'b-red',En_cours:'b-amber','En cours':'b-amber',Planifié:'b-purple'};
+  const extras=S.tasks.map((t,i)=>`<div class="task-item"><div class="task-check ${t.done?'done':''}" onclick="S.tasks[${i}].done=!S.tasks[${i}].done;localStorage.setItem('pf_tasks',JSON.stringify(S.tasks));renderTasks()">${t.done?'<svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3" stroke="white" stroke-width="1.5" fill="none"/></svg>':''}</div><div class="task-text ${t.done?'done':''}">${t.text}</div><span class="badge ${pmap[t.prio]||'b-purple'}" style="font-size:10px">${t.prio}</span></div>`).join('');
+  const base=list.innerHTML.split('<style>')[0];
+  list.innerHTML=list.innerHTML+extras;
+}
+function addTask(){const txt=document.getElementById('new-task-txt')?.value.trim(),prio=document.getElementById('new-task-prio')?.value;if(!txt){showNotif('Entre une tâche !','warn');return;}S.tasks.push({text:txt,prio:prio||'Planifié',done:false});localStorage.setItem('pf_tasks',JSON.stringify(S.tasks));document.getElementById('new-task-txt').value='';renderTasks();showNotif('✓ Tâche ajoutée !');}
+function toggleTask(el){el.classList.toggle('done');const txt=el.nextElementSibling;if(txt)txt.classList.toggle('done');const chk=el.classList.contains('done');if(chk)el.innerHTML='<svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3" stroke="white" stroke-width="1.5" fill="none"/></svg>';else el.innerHTML='';}
+
+// ══════ DEPLOY ══════
+function simulateDeploy(){
+  const user=document.getElementById('d-user').value||'username';
+  const repo=document.getElementById('d-repo').value||'portfolio';
+  document.getElementById('deploy-script').textContent=`# PowerShell — Copie et exécute dans ton terminal Windows
+
+cd "E:\\projets IA\\Portfolio_Factory\\Users\\Personal\\${document.getElementById('d-portfolio').value.split('—')[0].trim().toLowerCase().replace(/ /g,'-')}"
+
+git init
+git add .
+git commit -m "Portfolio auto-généré — Portfolio Factory v2.0"
+git branch -M main
+
+gh repo create ${repo} --public --source=. --remote=origin
+git push -u origin main
+
+# Activer GitHub Pages
+gh api repos/${user}/${repo}/pages -X POST -f source='{"branch":"main","path":"/"}'
+
+echo "✓ URL: https://${user}.github.io/${repo}/"`;
+  document.getElementById('pub-url').textContent=`https://${user}.github.io/${repo}/`;
+  document.getElementById('repo-url').textContent=`https://github.com/${user}/${repo}`;
+  document.getElementById('deploy-result').style.display='block';
+  showNotif('✓ Script et URLs générés !');
+}
+function copyDeployScript(){navigator.clipboard?.writeText(document.getElementById('deploy-script').textContent);showNotif('✓ Script copié !')}
+function copyURL(){navigator.clipboard?.writeText(document.getElementById('pub-url').textContent);showNotif('✓ URL copiée !')}
+function copyRepoURL(){navigator.clipboard?.writeText(document.getElementById('repo-url').textContent);showNotif('✓ URL repo copiée !')}
+
+// ══════ MISC ══════
+function selTpl(el){document.querySelectorAll('.tpl-card').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');}
+let _notifT;
+function showNotif(msg,type){
+  const n=document.getElementById('notif');
+  n.textContent=msg;n.className='notif'+(type?' '+type:'');n.style.display='block';
+  clearTimeout(_notifT);_notifT=setTimeout(()=>n.style.display='none',3000);
+}
+</script>
+</body>
+</html>
